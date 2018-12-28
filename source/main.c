@@ -11,6 +11,8 @@ const int blockdimension = 45; //size of the blocks 45 x 45 pixels
 const int wtoboard = 415;  //x co ordinate where the board begins
 const int rowtotal = 16;   // standard size of 16 rows 10 columns
 const int coltotal = 10;
+const int tetrohw = 4;
+int fallms = 500;
 
 int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
 					 {0,0,0,0,0,0,0,0,0,0},
@@ -88,11 +90,24 @@ int main(int argc, char* argv[]){
 	struct blockTetro tetromino = {{{0,1,1,0},
                          			{0,1,1,0},
                          			{0,0,0,0},
-                         			{0,0,0,0}} ,0,0};
+                         			{0,0,0,0}} ,0,4};
 
+	Uint32 currentMs = SDL_GetTicks();
+	//Uint32 lastMs = currentMs;
+	//float delta = 0.0;
+	//float fps = 0.0;
+	Uint32 lastFell = SDL_GetTicks();
     // Main loop
     while (appletMainLoop()){
         // Scan all the inputs. This should be done once for each frame
+		currentMs = SDL_GetTicks();
+		//delta = (currentMs-lastMs)/1000;
+		//fps = delta*1000;
+		//lastMs = currentMs;
+		if(currentMs - lastFell > fallms){
+			tetromino.row++;
+			lastFell = SDL_GetTicks();
+		}
         hidScanInput();
 
         // hidKeysDown returns information about which buttons have been
@@ -102,16 +117,32 @@ int main(int argc, char* argv[]){
         if (kDown & KEY_PLUS)
             break; // break in order to return to hbmenu
 
+		switch(kDown){
+			case KEY_LSTICK_RIGHT:
+				tetromino.col++;
+				break;
+			case KEY_LSTICK_LEFT:
+				tetromino.col--;
+				break;
+		}
+
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer,bgtexture,NULL,NULL);
-		for(int i =0; i<rowtotal;i++){
+		for(int i =0; i<rowtotal;i++){                 //Draw grounded blocks
 			for(int j = 0; j<coltotal;j++){
 				if(field[i][j] != 0){
 					drawBlock(renderer,pbtexture,i*blockdimension,j*blockdimension+wtoboard);
 				}
 			}
 		}
-		drawBlock(renderer,pbtexture,tetromino.row,tetromino.col+wtoboard);
+		for(int i = 0; i<tetrohw;i++){                   //Draw the currently falling tetromino
+			for(int j = 0; j<tetrohw;j++){
+				if(tetromino.shape[i][j] != 0){
+					drawBlock(renderer,pbtexture,(i+tetromino.row)*blockdimension,(j+tetromino.col)*blockdimension+wtoboard);
+				}
+			}
+		}
+		//drawBlock(renderer,pbtexture,tetromino.row,tetromino.col+wtoboard);
 		SDL_RenderPresent(renderer);
 
     }
