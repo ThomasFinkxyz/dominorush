@@ -7,6 +7,11 @@
 // Include the main libnx system header, for Switch development
 #include <switch.h>
 
+const int blockdimension = 45; //size of the blocks 45 x 45 pixels
+const int wtoboard = 415;  //x co ordinate where the board begins
+const int rowtotal = 16;   // standard size of 16 rows 10 columns
+const int coltotal = 10;
+
 int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
 					 {0,0,0,0,0,0,0,0,0,0},
 					 {0,0,0,0,0,0,0,0,0,0},
@@ -20,9 +25,10 @@ int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
-				 	 {0,0,0,0,0,0,0,0,0,0},
-				 	 {0,0,0,0,0,0,0,0,0,0},
-				 	 {0,0,0,0,0,0,0,0,0,0}};
+				 	 {0,1,1,0,0,0,0,0,0,0},
+				 	 {0,1,1,0,1,0,0,0,0,0},
+				 	 {0,0,1,1,1,1,1,1,1,1}};
+
 
 struct blockTetro{
 	int shape[4][4];
@@ -51,8 +57,8 @@ void drawBlock(SDL_Renderer *r, SDL_Texture *t,int y,int x){
 	SDL_Rect destR;
 	destR.y = y;
 	destR.x = x;
-	destR.w = 45;   //size of blocks is 45 X 45
-	destR.h = 45;
+	destR.w = blockdimension;   //size of blocks is 45 X 45
+	destR.h = blockdimension;
 	SDL_RenderCopy(r,t,NULL,&destR);
 };
 
@@ -79,6 +85,10 @@ int main(int argc, char* argv[]){
 	pbtexture = SDL_CreateTextureFromSurface(renderer,pbsurface);
 	SDL_FreeSurface(pbsurface);
 
+	struct blockTetro tetromino = {{{0,1,1,0},
+                         			{0,1,1,0},
+                         			{0,0,0,0},
+                         			{0,0,0,0}} ,0,0};
 
     // Main loop
     while (appletMainLoop()){
@@ -92,13 +102,16 @@ int main(int argc, char* argv[]){
         if (kDown & KEY_PLUS)
             break; // break in order to return to hbmenu
 
-		struct blockTetro tetromino = {{{0,1,1,0},
-                  						{0,1,1,0},
-                  						{0,0,0,0},
-                  						{0,0,0,0}},0,0};
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer,bgtexture,NULL,NULL);
-		drawBlock(renderer,pbtexture,tetromino.row,tetromino.col+415);
+		for(int i =0; i<rowtotal;i++){
+			for(int j = 0; j<coltotal;j++){
+				if(field[i][j] != 0){
+					drawBlock(renderer,pbtexture,i*blockdimension,j*blockdimension+wtoboard);
+				}
+			}
+		}
+		drawBlock(renderer,pbtexture,tetromino.row,tetromino.col+wtoboard);
 		SDL_RenderPresent(renderer);
 
     }
