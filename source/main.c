@@ -206,13 +206,27 @@ void tetroLeftRight(struct tetro* tetromino, leftorright direction){
 	switch(direction){
 		case left:
 			tetromino->potentialcol = tetromino->col-1;
-			if(tetromino->potentialcol >= 0)
-				tetromino->col = tetromino->potentialcol;
+			for(int i = 0; i<tetrohw;i++){
+				for(int j = 0; j<tetrohw;j++){
+					if(blockshape[i][j] != 0){
+						if(tetromino->potentialcol+j > 0){
+							tetromino->col = tetromino->potentialcol;
+						}
+					}
+				}
+			}
 			break;
 		case right:
 			tetromino->potentialcol = tetromino->col+1;
-			if(tetromino->potentialcol < 9)
-				tetromino->col = tetromino->potentialcol;
+			for(int i = 0; i<tetrohw;i++){
+				for(int j = 0; j<tetrohw;j++){
+					if(blockshape[i][j] != 0){
+						if(j+tetromino->potentialcol < 9){
+							tetromino->col = tetromino->potentialcol;
+						}
+					}
+				}
+			}
 			break;
 	}
 }
@@ -240,7 +254,7 @@ int main(int argc, char* argv[]){
 	pbtexture = SDL_CreateTextureFromSurface(renderer,pbsurface);
 	SDL_FreeSurface(pbsurface);
 	struct tetro* tetroptr;
-	tetroptr = newTetro(0,4,1);
+	tetroptr = newTetro(0,0,1);
 
 
 
@@ -262,7 +276,7 @@ int main(int argc, char* argv[]){
 			lastFell = SDL_GetTicks();
 			if(hitground){
 				free(tetroptr);
-				tetroptr = newTetro(3,3,1);
+				tetroptr = newTetro(0,0,1);
 			}
 		}
         hidScanInput();
