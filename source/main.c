@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <time.h>
 
 // Include the main libnx system header, for Switch development
 #include <switch.h>
@@ -32,12 +33,12 @@ int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
 				 	 {0,1,1,0,1,0,0,0,0,0},
 				 	 {0,0,1,1,1,1,1,1,1,1}};
 
-int blockshape [4][4] = {{0,1,1,0},
+int blockshape [4][4] = {{0,1,1,0},    // 1 type of O square block
 						 {0,1,1,0},
      					 {0,0,0,0},
      					 {0,0,0,0}};
 
-int TstraightUp [4][4] = {{0,0,0,0},
+int TstraightUp [4][4] = {{0,0,0,0},  // 4 types of T block
 					 	  {0,1,1,1},
 					 	  {0,0,1,0},
 					 	  {0,0,0,0}};
@@ -57,7 +58,7 @@ int TleftTilt [4][4] = {{0,0,1,0},
 					 	{0,0,1,0},
 					 	{0,0,0,0}};
 
-int IstraightUp [4][4] = {{0,0,1,0},
+int IstraightUp [4][4] = {{0,0,1,0},        //Two type of I straight block
 						 {0,0,1,0},
 						 {0,0,1,0},
 						 {0,0,1,0}};
@@ -67,7 +68,7 @@ int Isideways [4][4] = {{0,0,0,0},
 						{1,1,1,1},
 						{0,0,0,0}};
 
-int JstraightUp [4][4] = {{0,0,1,0},
+int JstraightUp [4][4] = {{0,0,1,0},        //Four types of J and L. 2 Types of S and Z.
 						  {0,0,1,0},
 						  {0,1,1,0},
 						  {0,0,0,0}};
@@ -133,7 +134,7 @@ struct tetro{
 	int col;
 	int potentialrow; //collision checking
 	int potentialcol;
-	enum {o,t,i,l,j,s,z}type;
+	enum {O,T,I,L,J,S,Z}type;
 };
 
 struct tetro* newTetro(int r, int c, int ty){
@@ -142,14 +143,31 @@ struct tetro* newTetro(int r, int c, int ty){
 	tetropointer->col = c;
 	tetropointer->type = ty;
 	switch(tetropointer->type){
-		case o:
+		case O:
 			tetropointer->shape = &blockshape;
 			break;
-		case i:
+		case I:
 			tetropointer->shape = &IstraightUp;
 			break;
-		default:
+		case T:
 			tetropointer->shape = &TstraightUp;
+			break;
+		case L:
+			tetropointer->shape = &LstraightUp;
+			break;
+		case J:
+			tetropointer->shape = &JstraightUp;
+			break;
+		case S:
+			tetropointer->shape =&SstraightUp;
+			break;
+		case Z:
+			tetropointer->shape = &ZstraightUp;
+			break;
+		default:
+			tetropointer->shape = &LstraightUp;
+			break;
+
 	}
 	return tetropointer;
 };
@@ -175,7 +193,7 @@ bool tetroDown(struct tetro * tetromino){
 			if(cantmove)
 				break;
 			for(int j = 0; j<tetrohw;j++){
-				if(blockshape[i][j] != 0){
+				if((*tetromino->shape)[i][j] != 0){
 					if(field[i+tetromino->potentialrow][j+tetromino->potentialcol] != 0){
 						cantmove = true;
 						break;
@@ -187,9 +205,9 @@ bool tetroDown(struct tetro * tetromino){
 	if(cantmove){
 		for(int i = 0; i<tetrohw;i++){
 			for(int j = 0; j<tetrohw;j++){
-				if(blockshape[i][j] != 0){
+				if((*tetromino->shape)[i][j] != 0){
 					if(i+tetromino->row < 16 && j+tetromino->col <10){
-					field[i+tetromino->row][j+tetromino->col] = blockshape[i][j];
+					field[i+tetromino->row][j+tetromino->col] = (*tetromino->shape)[i][j];
 					}
 				}
 			}
@@ -208,7 +226,7 @@ void tetroLeftRight(struct tetro* tetromino, leftorright direction){
 			tetromino->potentialcol = tetromino->col-1;
 			for(int i = 0; i<tetrohw;i++){
 				for(int j = 0; j<tetrohw;j++){
-					if(blockshape[i][j] != 0){
+					if((*tetromino->shape)[i][j] != 0){
 						if(tetromino->potentialcol+j > 0){
 							tetromino->col = tetromino->potentialcol;
 						}
@@ -220,7 +238,7 @@ void tetroLeftRight(struct tetro* tetromino, leftorright direction){
 			tetromino->potentialcol = tetromino->col+1;
 			for(int i = 0; i<tetrohw;i++){
 				for(int j = 0; j<tetrohw;j++){
-					if(blockshape[i][j] != 0){
+					if((*tetromino->shape)[i][j] != 0){
 						if(j+tetromino->potentialcol < 9){
 							tetromino->col = tetromino->potentialcol;
 						}
@@ -229,6 +247,10 @@ void tetroLeftRight(struct tetro* tetromino, leftorright direction){
 			}
 			break;
 	}
+}
+
+int rng(int lower, int upper){
+	return (rand() % (upper-lower + 1)) + lower; // % (upper-lower + 1) + lower is apparently what you need to do to get random number in a range in C.
 }
 
 // Main program entrypoint
@@ -253,8 +275,11 @@ int main(int argc, char* argv[]){
 	pbsurface = IMG_Load("romfs:/img/pinkblock.png");
 	pbtexture = SDL_CreateTextureFromSurface(renderer,pbsurface);
 	SDL_FreeSurface(pbsurface);
+	srand(time(0));
+	int random;
+	random = rng(1,7);
 	struct tetro* tetroptr;
-	tetroptr = newTetro(0,0,1);
+	tetroptr = newTetro(0,0,random);
 
 
 
@@ -276,7 +301,8 @@ int main(int argc, char* argv[]){
 			lastFell = SDL_GetTicks();
 			if(hitground){
 				free(tetroptr);
-				tetroptr = newTetro(0,0,1);
+				random = rng(1,7);
+				tetroptr = newTetro(0,0,random);
 			}
 		}
         hidScanInput();
@@ -308,7 +334,7 @@ int main(int argc, char* argv[]){
 		}
 		for(int i = 0; i<tetrohw;i++){                   //Draw the currently falling tetromino
 			for(int j = 0; j<tetrohw;j++){
-				if(blockshape[i][j] != 0){
+				if((*tetroptr->shape)[i][j] != 0){
 					drawBlock(renderer,pbtexture,(i+tetroptr->row)*blockdimension,(j+tetroptr->col)*blockdimension+wtoboard);
 				}
 			}
