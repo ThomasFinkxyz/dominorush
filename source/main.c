@@ -277,7 +277,7 @@ int main(int argc, char* argv[]){
 	SDL_FreeSurface(pbsurface);
 	srand(time(0));
 	int random;
-	random = rng(1,7);
+	random = rng(0,6);
 	struct tetro* tetroptr;
 	tetroptr = newTetro(0,0,random);
 
@@ -301,7 +301,7 @@ int main(int argc, char* argv[]){
 			lastFell = SDL_GetTicks();
 			if(hitground){
 				free(tetroptr);
-				random = rng(1,7);
+				random = rng(0,6);
 				tetroptr = newTetro(0,0,random);
 			}
 		}
