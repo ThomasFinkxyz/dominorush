@@ -33,12 +33,12 @@ int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
 				 	 {0,1,1,0,1,0,0,0,0,0},
 				 	 {0,0,1,1,1,1,1,1,1,1}};
 
-int blockshape [4][4] = {{0,1,1,0},    // 1 type of O square block
-						 {0,1,1,0},
+int blockshape [4][4] = {{0,2,2,0},    // 1 type of O square block. 2 makes them red.
+						 {0,2,2,0},
      					 {0,0,0,0},
      					 {0,0,0,0}};
 
-int TstraightUp [4][4] = {{0,0,0,0},  // 4 types of T block
+int TstraightUp [4][4] = {{0,0,0,0},  // 4 types of T block. 1 makes them pink.
 					 	  {0,1,1,1},
 					 	  {0,0,1,0},
 					 	  {0,0,0,0}};
@@ -58,75 +58,75 @@ int TleftTilt [4][4] = {{0,0,1,0},
 					 	{0,0,1,0},
 					 	{0,0,0,0}};
 
-int IstraightUp [4][4] = {{0,0,1,0},        //Two type of I straight block
-						 {0,0,1,0},
-						 {0,0,1,0},
-						 {0,0,1,0}};
+int IstraightUp [4][4] = {{0,0,3,0},        //Two type of I straight block. 3 makes them green.
+						 {0,0,3,0},
+						 {0,0,3,0},
+						 {0,0,3,0}};
 
 int Isideways [4][4] = {{0,0,0,0},
 					    {0,0,0,0},
-						{1,1,1,1},
+						{3,3,3,3},
 						{0,0,0,0}};
 
-int JstraightUp [4][4] = {{0,0,1,0},        //Four types of J and L. 2 Types of S and Z.
-						  {0,0,1,0},
-						  {0,1,1,0},
+int JstraightUp [4][4] = {{0,0,4,0},        //Four types of J and L. 4 makes J light blue. 5 makes L orange.
+						  {0,0,4,0},
+						  {0,4,4,0},
 						  {0,0,0,0}};
 
-int JrightTilt [4][4] = {{0,1,0,0},
-						 {0,1,1,1},
+int JrightTilt [4][4] = {{0,4,0,0},
+						 {0,4,4,4},
 						 {0,0,0,0},
 						 {0,0,0,0}};
 
-int JupsideDown [4][4] = {{0,0,1,1},
-						  {0,0,1,0},
-						  {0,0,1,0},
+int JupsideDown [4][4] = {{0,0,4,4},
+						  {0,0,4,0},
+						  {0,0,4,0},
 						  {0,0,0,0}};
 
 int JleftTilt [4][4] = {{0,0,0,0},
-						 {0,1,1,1},
-						 {0,0,0,1},
+						 {0,4,4,4},
+						 {0,0,0,4},
 						 {0,0,0,0}};
 
-int LstraightUp [4][4] = {{0,0,1,0},
-						  {0,0,1,0},
-						  {0,0,1,1},
+int LstraightUp [4][4] = {{0,0,5,0},
+						  {0,0,5,0},
+						  {0,0,5,5},
 						  {0,0,0,0}};
 
 int LrightTilt [4][4] = {{0,0,0,0},
-						 {0,1,1,1},
-						 {0,1,0,0},
+						 {0,5,5,5},
+						 {0,5,0,0},
 						 {0,0,0,0}};
 
-int LupsideDown [4][4] = {{0,1,1,0},
-						  {0,0,1,0},
-						  {0,0,1,0},
+int LupsideDown [4][4] = {{0,5,5,0},
+						  {0,0,5,0},
+						  {0,0,5,0},
 						  {0,0,0,0}};
 
-int LleftTilt [4][4] = {{0,0,0,1},
-						{0,1,1,1},
+int LleftTilt [4][4] = {{0,0,0,5},
+						{0,5,5,5},
 						{0,0,0,0},
 						{0,0,0,0}};
 
-int SstraightUp [4][4] = {{0,0,1,0},
-						  {0,0,1,1},
-						  {0,0,0,1},
+int SstraightUp [4][4] = {{0,0,6,0},                   //2 types of S and Z. 6 makes S yellow. 7 makes Z purple.
+						  {0,0,6,6},
+						  {0,0,0,6},
 						  {0,0,0,0}};
 
 int Ssideways [4][4] = {{0,0,0,0},
-						{0,0,1,1},
-						{0,1,1,0},
+						{0,0,6,6},
+						{0,6,6,0},
 						{0,0,0,0}};
 
-int ZstraightUp [4][4] = {{0,0,0,1},
-						  {0,0,1,1},
-						  {0,0,1,0},
+int ZstraightUp [4][4] = {{0,0,0,7},
+						  {0,0,7,7},
+						  {0,0,7,0},
 						  {0,0,0,0}};
 
 int ZstraightSideways [4][4] = {{0,0,0,0},
 						  		{0,0,0,0},
-						  		{0,1,1,0},
-						  		{0,0,1,1}};
+						  		{0,7,7,0},
+						  		{0,0,7,7}};
 
 struct tetro{
 	int (*shape) [4][4];
@@ -225,6 +225,8 @@ void tetroLeftRight(struct tetro* tetromino, leftorright direction){
 		case left:
 			tetromino->potentialcol = tetromino->col-1;
 			for(int i = 0; i<tetrohw;i++){
+				if(tetromino->potentialcol == tetromino->col)
+					break;
 				for(int j = 0; j<tetrohw;j++){
 					if((*tetromino->shape)[i][j] != 0){
 						if(tetromino->potentialcol+j > 0){
@@ -237,6 +239,8 @@ void tetroLeftRight(struct tetro* tetromino, leftorright direction){
 		case right:
 			tetromino->potentialcol = tetromino->col+1;
 			for(int i = 0; i<tetrohw;i++){
+				if(tetromino->potentialcol == tetromino->col)
+					break;
 				for(int j = 0; j<tetrohw;j++){
 					if((*tetromino->shape)[i][j] != 0){
 						if(j+tetromino->potentialcol < 9){
@@ -265,16 +269,46 @@ int main(int argc, char* argv[]){
 	SDL_Renderer *renderer;
 	SDL_Surface *bgsurface;
 	SDL_Texture *bgtexture;
-	SDL_Texture *pbtexture;
-	SDL_Surface *pbsurface;
+	SDL_Texture *blocktextures[7];
+	SDL_Surface *blocksurface;
 
 	SDL_CreateWindowAndRenderer(0,0,SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
 	bgsurface = IMG_Load("romfs:/img/background.png");
 	bgtexture = SDL_CreateTextureFromSurface(renderer,bgsurface);
 	SDL_FreeSurface(bgsurface);
-	pbsurface = IMG_Load("romfs:/img/pinkblock.png");
-	pbtexture = SDL_CreateTextureFromSurface(renderer,pbsurface);
-	SDL_FreeSurface(pbsurface);
+
+	//load all the block textures into an array for later use.
+
+	blocksurface = IMG_Load("romfs:/img/pinkblock.png");
+	blocktextures[0] = SDL_CreateTextureFromSurface(renderer,blocksurface);
+	SDL_FreeSurface(blocksurface);
+
+	blocksurface = IMG_Load("romfs:/img/redblock.png");
+	blocktextures[1] = SDL_CreateTextureFromSurface(renderer,blocksurface);
+	SDL_FreeSurface(blocksurface);
+
+	blocksurface = IMG_Load("romfs:/img/greenblock.png");
+	blocktextures[2] = SDL_CreateTextureFromSurface(renderer,blocksurface);
+	SDL_FreeSurface(blocksurface);
+
+	blocksurface = IMG_Load("romfs:/img/blueblock.png");
+	blocktextures[3] = SDL_CreateTextureFromSurface(renderer,blocksurface);
+	SDL_FreeSurface(blocksurface);
+
+	blocksurface = IMG_Load("romfs:/img/orangeblock.png");
+	blocktextures[4] = SDL_CreateTextureFromSurface(renderer,blocksurface);
+	SDL_FreeSurface(blocksurface);
+
+	blocksurface = IMG_Load("romfs:/img/yellowblock.png");
+	blocktextures[5] = SDL_CreateTextureFromSurface(renderer,blocksurface);
+	SDL_FreeSurface(blocksurface);
+
+	blocksurface = IMG_Load("romfs:/img/purpleblock.png");
+	blocktextures[6] = SDL_CreateTextureFromSurface(renderer,blocksurface);
+	SDL_FreeSurface(blocksurface);
+
+	int textureindex;
+
 	srand(time(0));
 	int random;
 	random = rng(0,6);
@@ -328,14 +362,16 @@ int main(int argc, char* argv[]){
 		for(int i =0; i<rowtotal;i++){                 //Draw grounded blocks
 			for(int j = 0; j<coltotal;j++){
 				if(field[i][j] != 0){
-					drawBlock(renderer,pbtexture,i*blockdimension,j*blockdimension+wtoboard);
+					textureindex = field[i][j] -1;
+					drawBlock(renderer,blocktextures[textureindex],i*blockdimension,j*blockdimension+wtoboard);
 				}
 			}
 		}
 		for(int i = 0; i<tetrohw;i++){                   //Draw the currently falling tetromino
 			for(int j = 0; j<tetrohw;j++){
 				if((*tetroptr->shape)[i][j] != 0){
-					drawBlock(renderer,pbtexture,(i+tetroptr->row)*blockdimension,(j+tetroptr->col)*blockdimension+wtoboard);
+					textureindex = (*tetroptr->shape)[i][j] -1;
+					drawBlock(renderer,blocktextures[textureindex],(i+tetroptr->row)*blockdimension,(j+tetroptr->col)*blockdimension+wtoboard);
 				}
 			}
 		}
@@ -349,7 +385,9 @@ int main(int argc, char* argv[]){
 	romfsExit();
 	IMG_Quit();
 	SDL_DestroyTexture(bgtexture);
-	SDL_DestroyTexture(pbtexture);
+	for(int i =0; i<7;i++){
+		SDL_DestroyTexture(blocktextures[i]);
+	}
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
