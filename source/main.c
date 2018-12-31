@@ -30,7 +30,7 @@ int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
-				 	 {0,0,0,0,1,0,0,0,0,0},
+				 	 {0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0}};
 
 int blockshape [4][4] = {{0,2,2,0},    // 1 type of O square block. 2 makes them red.
@@ -123,7 +123,7 @@ int ZstraightUp [4][4] = {{0,0,0,7},
 						  {0,0,7,0},
 						  {0,0,0,0}};
 
-int ZstraightSideways [4][4] = {{0,0,0,0},
+int Zsideways [4][4] = {{0,0,0,0},
 						  		{0,0,0,0},
 						  		{0,7,7,0},
 						  		{0,0,7,7}};
@@ -135,12 +135,14 @@ struct tetro{
 	int potentialrow; //collision checking
 	int potentialcol;
 	enum {O,T,I,L,J,S,Z}type;
+	int rotnumber;
 };
 
 struct tetro* newTetro(int r, int c, int ty){
 	struct tetro* tetropointer = (struct tetro*)malloc(sizeof(struct tetro));
 	tetropointer->row = r;
 	tetropointer->col = c;
+	tetropointer->rotnumber = 1;
 	tetropointer->type = ty;
 	switch(tetropointer->type){
 		case O:
@@ -180,6 +182,20 @@ void drawBlock(SDL_Renderer *r, SDL_Texture *t,int y,int x){
 	destR.h = blockdimension;
 	SDL_RenderCopy(r,t,NULL,&destR);
 };
+
+void drawText(SDL_Renderer *renderer, TTF_Font *font, int x, int y, SDL_Color color, const char *text)
+{
+	SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, text, color, 1280);
+	SDL_SetSurfaceAlphaMod(surface, color.a);
+	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_FreeSurface(surface);
+
+	SDL_Rect position;
+	position.x = x; position.y = y;
+	SDL_QueryTexture(texture, NULL, NULL, &position.w, &position.h);
+	SDL_RenderCopy(renderer, texture, NULL, &position);
+	SDL_DestroyTexture(texture);
+}
 
 bool tetroDown(struct tetro * tetromino){
 	tetromino->potentialrow = tetromino->row+1;
@@ -276,6 +292,175 @@ void tetroLeftRight(struct tetro* tetromino, leftorright direction){
 	}
 }
 
+bool allowedToRotate(int row, int col, int shape[4][4]){
+	for(int i = 0; i<tetrohw; i++){
+		for(int j = 0; j<tetrohw; j++){
+			if(shape[i][j] != 0){
+				if(i+row < 0 || i+row > 15 || j+col < 0 || j+row >9){
+					//out of bounds
+				   return false;
+			  	}
+				if(field[row+i][col+j] != 0){
+					//blocks blocking you
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+void tetroRotate(struct tetro* tetromino){
+	tetromino->rotnumber++;
+	bool rotated = false;
+	switch(tetromino->type){
+		case O:
+			break;
+		case I:
+			switch(tetromino->rotnumber){
+				case 2:
+					if(allowedToRotate(tetromino->row,tetromino->col,Isideways)){
+						tetromino->shape = &Isideways;
+						rotated = true;
+					}
+					break;
+				default:
+					if(allowedToRotate(tetromino->row,tetromino->col,IstraightUp)){
+						tetromino->rotnumber = 1;
+						tetromino->shape = &IstraightUp;
+						rotated = true;
+					}
+					break;
+			}
+			break;
+		case T:
+			switch(tetromino->rotnumber){
+				case 2:
+					if(allowedToRotate(tetromino->row,tetromino->col,TrightTilt)){
+						tetromino->shape = &TrightTilt;
+						rotated = true;
+					}
+					break;
+				case 3:
+					if(allowedToRotate(tetromino->row,tetromino->col,TrightTilt)){
+						tetromino->shape = &TupsideDown;
+						rotated = true;
+					}
+					break;
+				case 4:
+					if(allowedToRotate(tetromino->row,tetromino->col,TleftTilt)){
+						tetromino->shape = &TleftTilt;
+						rotated = true;
+					}
+					break;
+				default:
+					if(allowedToRotate(tetromino->row,tetromino->col,TstraightUp)){
+						tetromino->rotnumber = 1;
+						tetromino->shape = &TstraightUp;
+						rotated = true;
+					}
+					break;
+			}
+			break;
+		case L:
+			switch(tetromino->rotnumber){
+				case 2:
+					if(allowedToRotate(tetromino->row,tetromino->col,LrightTilt)){
+						tetromino->shape = &LrightTilt;
+						rotated = true;
+					}
+					break;
+				case 3:
+					if(allowedToRotate(tetromino->row,tetromino->col,LupsideDown)){
+						tetromino->shape = &LupsideDown;
+						rotated = true;
+					}
+					break;
+				case 4:
+					if(allowedToRotate(tetromino->row,tetromino->col,LleftTilt)){
+						tetromino->shape = &LleftTilt;
+						rotated = true;
+					}
+					break;
+				default:
+					if(allowedToRotate(tetromino->row,tetromino->col,LstraightUp)){
+						tetromino->rotnumber = 1;
+						tetromino->shape = &LstraightUp;
+						rotated = true;
+					}
+					break;
+			}
+			break;
+		case J:
+			switch(tetromino->rotnumber){
+				case 2:
+					if(allowedToRotate(tetromino->row,tetromino->col,JrightTilt)){
+						tetromino->shape = &JrightTilt;
+						rotated = true;
+					}
+					break;
+				case 3:
+					if(allowedToRotate(tetromino->row,tetromino->col,JupsideDown)){
+						tetromino->shape = &JupsideDown;
+						rotated = true;
+					}
+					break;
+				case 4:
+					if(allowedToRotate(tetromino->row,tetromino->col,JleftTilt)){
+						tetromino->shape = &JleftTilt;
+						rotated = true;
+					}
+					break;
+				default:
+					if(allowedToRotate(tetromino->row,tetromino->col,JstraightUp)){
+						tetromino->rotnumber = 1;
+						tetromino->shape = &JstraightUp;
+						rotated = true;
+					}
+					break;
+			}
+			break;
+		case S:
+			switch(tetromino->rotnumber){
+				case 2:
+					if(allowedToRotate(tetromino->row,tetromino->col,Ssideways)){
+						tetromino->shape = &Ssideways;
+						rotated = true;
+					}
+					break;
+				default:
+					if(allowedToRotate(tetromino->row,tetromino->col,SstraightUp)){
+						tetromino->rotnumber = 1;
+						tetromino->shape =&SstraightUp;
+						rotated = true;
+					}
+					break;
+			}
+			break;
+		case Z:
+			switch(tetromino->rotnumber){
+				case 2:
+					if(allowedToRotate(tetromino->row,tetromino->col,Zsideways)){
+						tetromino->shape = &Zsideways;
+						rotated = true;
+					}
+					break;
+				default:
+					if(allowedToRotate(tetromino->row,tetromino->col,ZstraightUp)){
+						tetromino->rotnumber = 1;
+						tetromino->shape = &ZstraightUp;
+						rotated = true;
+					}
+					break;
+			}
+			break;
+	}
+	if(!rotated)
+		tetromino->rotnumber--;
+}
+
+
+
 int rng(int lower, int upper){
 	return (rand() % (upper-lower + 1)) + lower; // % (upper-lower + 1) + lower is apparently what you need to do to get random number in a range in C.
 }
@@ -329,7 +514,9 @@ int main(int argc, char* argv[]){
 	blocksurface = IMG_Load("romfs:/img/purpleblock.png");
 	blocktextures[6] = SDL_CreateTextureFromSurface(renderer,blocksurface);
 	SDL_FreeSurface(blocksurface);
-
+	char score[4];
+	SDL_Color color = {255,255,255,255};
+	TTF_Font *Roboto_80 = TTF_OpenFont("romfs:Roboto-Regular.ttf", 80);
 	int textureindex;
 
 	srand(time(0));
@@ -378,6 +565,9 @@ int main(int argc, char* argv[]){
 			case KEY_LSTICK_LEFT:
 				tetroLeftRight(tetroptr,left);
 				break;
+			case KEY_B:
+				tetroRotate(tetroptr);
+				break;
 		}
 
 		SDL_RenderClear(renderer);
@@ -399,6 +589,8 @@ int main(int argc, char* argv[]){
 			}
 		}
 		//drawBlock(renderer,pbtexture,tetromino.row,tetromino.col+wtoboard);
+		sprintf(score,"%d",tetroptr->rotnumber);
+		drawText(renderer, Roboto_80, 0, 0, color, score);
 		SDL_RenderPresent(renderer);
 
     }
