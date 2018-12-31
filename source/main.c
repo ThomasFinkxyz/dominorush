@@ -130,6 +130,10 @@ int Zsideways [4][4] = {{0,0,0,0},
 
 struct tetro{
 	int (*shape) [4][4];
+	int (*shape1) [4][4];
+	int (*shape2) [4][4];
+	int (*shape3) [4][4];
+	int (*shape4) [4][4];
 	int row;   //row and col of top left block
 	int col;
 	int potentialrow; //collision checking
@@ -150,24 +154,52 @@ struct tetro* newTetro(int r, int c, int ty){
 			break;
 		case I:
 			tetropointer->shape = &IstraightUp;
+			tetropointer->shape1 = tetropointer->shape;
+			tetropointer->shape2 = &Isideways;
+			tetropointer->shape3 = tetropointer->shape;
+			tetropointer->shape4 = tetropointer->shape2;
 			break;
 		case T:
 			tetropointer->shape = &TstraightUp;
+			tetropointer->shape1 = tetropointer->shape;
+			tetropointer->shape2 = &TrightTilt;
+			tetropointer->shape3 = &TupsideDown;
+			tetropointer->shape4 = &TleftTilt;
 			break;
 		case L:
 			tetropointer->shape = &LstraightUp;
+			tetropointer->shape1 = tetropointer->shape;
+			tetropointer->shape2 = &LrightTilt;
+			tetropointer->shape3 = &LupsideDown;
+			tetropointer->shape4 = &LleftTilt;
 			break;
 		case J:
 			tetropointer->shape = &JstraightUp;
+			tetropointer->shape1 = tetropointer->shape;
+			tetropointer->shape2 = &JrightTilt;
+			tetropointer->shape3 = &JupsideDown;
+			tetropointer->shape4 = &JleftTilt;
 			break;
 		case S:
 			tetropointer->shape =&SstraightUp;
+			tetropointer->shape1 = tetropointer->shape;
+			tetropointer->shape2 = &Ssideways;
+			tetropointer->shape3 = tetropointer->shape;
+			tetropointer->shape4 = tetropointer->shape2;
 			break;
 		case Z:
 			tetropointer->shape = &ZstraightUp;
+			tetropointer->shape1 = tetropointer->shape;
+			tetropointer->shape2 = &Zsideways;
+			tetropointer->shape3 = tetropointer->shape;
+			tetropointer->shape4 = tetropointer->shape2;
 			break;
 		default:
 			tetropointer->shape = &LstraightUp;
+			tetropointer->shape1 = tetropointer->shape;
+			tetropointer->shape2 = &LrightTilt;
+			tetropointer->shape3 = &LupsideDown;
+			tetropointer->shape4 = &LleftTilt;
 			break;
 
 	}
@@ -296,7 +328,7 @@ bool allowedToRotate(int row, int col, int shape[4][4]){
 	for(int i = 0; i<tetrohw; i++){
 		for(int j = 0; j<tetrohw; j++){
 			if(shape[i][j] != 0){
-				if(i+row < 0 || i+row > 15 || j+col < 0 || j+row >9){
+				if(i+row < 0 || i+row > 15 || j+col < 0 || j+col >9){
 					//out of bounds
 				   return false;
 			  	}
@@ -311,153 +343,190 @@ bool allowedToRotate(int row, int col, int shape[4][4]){
 }
 
 void tetroRotate(struct tetro* tetromino){
-	tetromino->rotnumber++;
-	bool rotated = false;
-	switch(tetromino->type){
-		case O:
-			break;
-		case I:
-			switch(tetromino->rotnumber){
-				case 2:
-					if(allowedToRotate(tetromino->row,tetromino->col,Isideways)){
-						tetromino->shape = &Isideways;
-						rotated = true;
-					}
-					break;
-				default:
-					if(allowedToRotate(tetromino->row,tetromino->col,IstraightUp)){
-						tetromino->rotnumber = 1;
-						tetromino->shape = &IstraightUp;
-						rotated = true;
-					}
-					break;
-			}
-			break;
-		case T:
-			switch(tetromino->rotnumber){
-				case 2:
-					if(allowedToRotate(tetromino->row,tetromino->col,TrightTilt)){
-						tetromino->shape = &TrightTilt;
-						rotated = true;
-					}
-					break;
-				case 3:
-					if(allowedToRotate(tetromino->row,tetromino->col,TrightTilt)){
-						tetromino->shape = &TupsideDown;
-						rotated = true;
-					}
-					break;
-				case 4:
-					if(allowedToRotate(tetromino->row,tetromino->col,TleftTilt)){
-						tetromino->shape = &TleftTilt;
-						rotated = true;
-					}
-					break;
-				default:
-					if(allowedToRotate(tetromino->row,tetromino->col,TstraightUp)){
-						tetromino->rotnumber = 1;
-						tetromino->shape = &TstraightUp;
-						rotated = true;
-					}
-					break;
-			}
-			break;
-		case L:
-			switch(tetromino->rotnumber){
-				case 2:
-					if(allowedToRotate(tetromino->row,tetromino->col,LrightTilt)){
-						tetromino->shape = &LrightTilt;
-						rotated = true;
-					}
-					break;
-				case 3:
-					if(allowedToRotate(tetromino->row,tetromino->col,LupsideDown)){
-						tetromino->shape = &LupsideDown;
-						rotated = true;
-					}
-					break;
-				case 4:
-					if(allowedToRotate(tetromino->row,tetromino->col,LleftTilt)){
-						tetromino->shape = &LleftTilt;
-						rotated = true;
-					}
-					break;
-				default:
-					if(allowedToRotate(tetromino->row,tetromino->col,LstraightUp)){
-						tetromino->rotnumber = 1;
-						tetromino->shape = &LstraightUp;
-						rotated = true;
-					}
-					break;
-			}
-			break;
-		case J:
-			switch(tetromino->rotnumber){
-				case 2:
-					if(allowedToRotate(tetromino->row,tetromino->col,JrightTilt)){
-						tetromino->shape = &JrightTilt;
-						rotated = true;
-					}
-					break;
-				case 3:
-					if(allowedToRotate(tetromino->row,tetromino->col,JupsideDown)){
-						tetromino->shape = &JupsideDown;
-						rotated = true;
-					}
-					break;
-				case 4:
-					if(allowedToRotate(tetromino->row,tetromino->col,JleftTilt)){
-						tetromino->shape = &JleftTilt;
-						rotated = true;
-					}
-					break;
-				default:
-					if(allowedToRotate(tetromino->row,tetromino->col,JstraightUp)){
-						tetromino->rotnumber = 1;
-						tetromino->shape = &JstraightUp;
-						rotated = true;
-					}
-					break;
-			}
-			break;
-		case S:
-			switch(tetromino->rotnumber){
-				case 2:
-					if(allowedToRotate(tetromino->row,tetromino->col,Ssideways)){
-						tetromino->shape = &Ssideways;
-						rotated = true;
-					}
-					break;
-				default:
-					if(allowedToRotate(tetromino->row,tetromino->col,SstraightUp)){
-						tetromino->rotnumber = 1;
-						tetromino->shape =&SstraightUp;
-						rotated = true;
-					}
-					break;
-			}
-			break;
-		case Z:
-			switch(tetromino->rotnumber){
-				case 2:
-					if(allowedToRotate(tetromino->row,tetromino->col,Zsideways)){
-						tetromino->shape = &Zsideways;
-						rotated = true;
-					}
-					break;
-				default:
-					if(allowedToRotate(tetromino->row,tetromino->col,ZstraightUp)){
-						tetromino->rotnumber = 1;
-						tetromino->shape = &ZstraightUp;
-						rotated = true;
-					}
-					break;
-			}
-			break;
+	if(tetromino->type == O){
+		return;
 	}
-	if(!rotated)
-		tetromino->rotnumber--;
+	int potentialrotnumber = tetromino->rotnumber+1;
+	if(potentialrotnumber > 4){
+		potentialrotnumber = 1;
+	}
+	switch(potentialrotnumber){
+		case 1:
+			if(allowedToRotate(tetromino->row,tetromino->col,(*tetromino->shape1))){
+				tetromino->shape = tetromino->shape1;
+				tetromino->rotnumber = potentialrotnumber;
+			}
+			break;
+		case 2:
+			if(allowedToRotate(tetromino->row,tetromino->col,(*tetromino->shape2))){
+				tetromino->shape = tetromino->shape2;
+				tetromino->rotnumber = potentialrotnumber;
+			}
+			break;
+		case 3:
+			if(allowedToRotate(tetromino->row,tetromino->col,(*tetromino->shape3))){
+				tetromino->shape = tetromino->shape3;
+				tetromino->rotnumber = potentialrotnumber;
+			}
+			break;
+		case 4:
+			if(allowedToRotate(tetromino->row,tetromino->col,(*tetromino->shape4))){
+				tetromino->shape = tetromino->shape4;
+				tetromino->rotnumber = potentialrotnumber;
+			}
+			break;
+
+	}
 }
+
+//void tetroRotate(struct tetro* tetromino){
+//	tetromino->rotnumber++;
+//	bool rotated = false;
+//	switch(tetromino->type){
+//		case O:
+//			break;
+//		case I:
+//			switch(tetromino->rotnumber){
+//				case 2:
+//					if(allowedToRotate(tetromino->row,tetromino->col,Isideways)){
+//						tetromino->shape = &Isideways;
+//						rotated = true;
+//					}
+//					break;
+//				default:
+//					if(allowedToRotate(tetromino->row,tetromino->col,IstraightUp)){
+//						tetromino->rotnumber = 1;
+//						tetromino->shape = &IstraightUp;
+//						rotated = true;
+//					}
+//					break;
+//			}
+//			break;
+//		case T:
+//			switch(tetromino->rotnumber){
+//				case 2:
+//					if(allowedToRotate(tetromino->row,tetromino->col,TrightTilt)){
+//						tetromino->shape = &TrightTilt;
+//						rotated = true;
+//					}
+//					break;
+//				case 3:
+//					if(allowedToRotate(tetromino->row,tetromino->col,TrightTilt)){
+//						tetromino->shape = &TupsideDown;
+//						rotated = true;
+//					}
+//					break;
+//				case 4:
+//					if(allowedToRotate(tetromino->row,tetromino->col,TleftTilt)){
+//						tetromino->shape = &TleftTilt;
+//						rotated = true;
+//					}
+//					break;
+//				default:
+//					if(allowedToRotate(tetromino->row,tetromino->col,TstraightUp)){
+//						tetromino->rotnumber = 1;
+//						tetromino->shape = &TstraightUp;
+//						rotated = true;
+//					}
+//					break;
+//			}
+//			break;
+//		case L:
+//			switch(tetromino->rotnumber){
+//				case 2:
+//					if(allowedToRotate(tetromino->row,tetromino->col,LrightTilt)){
+//						tetromino->shape = &LrightTilt;
+//						rotated = true;
+//					}
+//					break;
+//				case 3:
+//					if(allowedToRotate(tetromino->row,tetromino->col,LupsideDown)){
+//						tetromino->shape = &LupsideDown;
+//						rotated = true;
+//					}
+//					break;
+//				case 4:
+//					if(allowedToRotate(tetromino->row,tetromino->col,LleftTilt)){
+//						tetromino->shape = &LleftTilt;
+//						rotated = true;
+//					}
+//					break;
+//				default:
+//					if(allowedToRotate(tetromino->row,tetromino->col,LstraightUp)){
+//						tetromino->rotnumber = 1;
+//						tetromino->shape = &LstraightUp;
+//						rotated = true;
+//					}
+//					break;
+//			}
+//			break;
+//		case J:
+//			switch(tetromino->rotnumber){
+//				case 2:
+//					if(allowedToRotate(tetromino->row,tetromino->col,JrightTilt)){
+//						tetromino->shape = &JrightTilt;
+//						rotated = true;
+//					}
+//					break;
+//				case 3:
+//					if(allowedToRotate(tetromino->row,tetromino->col,JupsideDown)){
+//						tetromino->shape = &JupsideDown;
+//						rotated = true;
+//					}
+//					break;
+//				case 4:
+//					if(allowedToRotate(tetromino->row,tetromino->col,JleftTilt)){
+//						tetromino->shape = &JleftTilt;
+//						rotated = true;
+//					}
+//					break;
+//				default:
+//					if(allowedToRotate(tetromino->row,tetromino->col,JstraightUp)){
+//						tetromino->rotnumber = 1;
+//						tetromino->shape = &JstraightUp;
+//						rotated = true;
+//					}
+//					break;
+//			}
+//			break;
+//		case S:
+//			switch(tetromino->rotnumber){
+//				case 2:
+//					if(allowedToRotate(tetromino->row,tetromino->col,Ssideways)){
+//						tetromino->shape = &Ssideways;
+//						rotated = true;
+//					}
+//					break;
+//				default:
+//					if(allowedToRotate(tetromino->row,tetromino->col,SstraightUp)){
+//						tetromino->rotnumber = 1;
+//						tetromino->shape =&SstraightUp;
+//						rotated = true;
+//					}
+//					break;
+//			}
+//			break;
+//		case Z:
+//			switch(tetromino->rotnumber){
+//				case 2:
+//					if(allowedToRotate(tetromino->row,tetromino->col,Zsideways)){
+//						tetromino->shape = &Zsideways;
+//						rotated = true;
+//					}
+//					break;
+//				default:
+//					if(allowedToRotate(tetromino->row,tetromino->col,ZstraightUp)){
+//						tetromino->rotnumber = 1;
+//						tetromino->shape = &ZstraightUp;
+//						rotated = true;
+//					}
+//					break;
+//			}
+//			break;
+//	}
+//	if(!rotated)
+//		tetromino->rotnumber--;
+//}
 
 
 
