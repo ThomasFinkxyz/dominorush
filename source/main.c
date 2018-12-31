@@ -29,9 +29,9 @@ int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
 				 	 {0,0,0,0,0,0,0,0,0,0},
-				 	 {0,1,1,0,0,0,0,0,0,0},
-				 	 {0,1,1,0,1,0,0,0,0,0},
-				 	 {0,0,1,1,1,1,1,1,1,1}};
+				 	 {0,0,0,0,0,0,0,0,0,0},
+				 	 {0,0,0,0,1,0,0,0,0,0},
+				 	 {0,0,0,0,0,0,0,0,0,0}};
 
 int blockshape [4][4] = {{0,2,2,0},    // 1 type of O square block. 2 makes them red.
 						 {0,2,2,0},
@@ -194,6 +194,10 @@ bool tetroDown(struct tetro * tetromino){
 				break;
 			for(int j = 0; j<tetrohw;j++){
 				if((*tetromino->shape)[i][j] != 0){
+					if(tetromino->potentialrow+i > 15){
+						cantmove = true;
+						break;
+					}
 					if(field[i+tetromino->potentialrow][j+tetromino->potentialcol] != 0){
 						cantmove = true;
 						break;
@@ -221,34 +225,53 @@ bool tetroDown(struct tetro * tetromino){
 }
 
 void tetroLeftRight(struct tetro* tetromino, leftorright direction){
+	bool notallowed = false;
 	switch(direction){
 		case left:
 			tetromino->potentialcol = tetromino->col-1;
 			for(int i = 0; i<tetrohw;i++){
-				if(tetromino->potentialcol == tetromino->col)
+				if(notallowed)
 					break;
 				for(int j = 0; j<tetrohw;j++){
 					if((*tetromino->shape)[i][j] != 0){
-						if(tetromino->potentialcol+j > 0){
-							tetromino->col = tetromino->potentialcol;
+						if(tetromino->potentialcol+j < 0){
+							//Out of bounds
+							notallowed = true;
+							break;
+						}
+						else if(field[tetromino->row+i][tetromino->potentialcol+j] != 0){
+							//Space taken
+							notallowed = true;
+							break;
 						}
 					}
 				}
 			}
+			if(!notallowed)
+				tetromino->col = tetromino->potentialcol;
 			break;
 		case right:
 			tetromino->potentialcol = tetromino->col+1;
 			for(int i = 0; i<tetrohw;i++){
-				if(tetromino->potentialcol == tetromino->col)
+				if(notallowed)
 					break;
 				for(int j = 0; j<tetrohw;j++){
 					if((*tetromino->shape)[i][j] != 0){
-						if(j+tetromino->potentialcol < 9){
-							tetromino->col = tetromino->potentialcol;
+						if(tetromino->potentialcol+j >= coltotal){
+							//Out of bounds
+							notallowed = true;
+							break;
+						}
+						else if(field[tetromino->row+i][tetromino->potentialcol+j] != 0){
+							//Space taken
+							notallowed = true;
+							break;
 						}
 					}
 				}
 			}
+			if(!notallowed)
+				tetromino->col = tetromino->potentialcol;
 			break;
 	}
 }
