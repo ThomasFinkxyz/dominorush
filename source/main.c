@@ -14,7 +14,7 @@ const int rowtotal = 16;   // standard size of 16 rows 10 columns
 const int coltotal = 10;
 const int tetrohw = 4;
 bool gameOver = false;
-int fallms = 300;
+int fallms = 500;
 typedef enum {left,right}leftorright;
 
 int field[16][10] = {{0,0,0,0,0,0,0,0,0,0},
@@ -382,6 +382,26 @@ void tetroRotate(struct tetro* tetromino){
 	}
 }
 
+void fall(int row, int col, int color){
+	if(row+1 > 15 || field[row+1][col] != 0){
+		field[row][col] = color;
+	} else{
+		fall(row+1,col,color);
+	}
+}
+
+void blocksFall(int rowDestroyed){
+	for(int row = rowDestroyed; row >= 0; row--){
+		for(int col = 0; col<coltotal; col++){
+			if(field[row][col] != 0){
+				int poscolor = field[row][col];
+				field[row][col] = 0;
+				fall(row,col,poscolor);
+			}
+		}
+	}
+}
+
 int checkForFullRow(){
 	int destroyedblocks = 0;
 	bool rowfilled;
@@ -393,14 +413,18 @@ int checkForFullRow(){
 			}
 		}
 		if(rowfilled){
-			for(int j = 0; j<coltotal; j++){
-				field[i][j] = 0;
+			for(int k = 0; k<coltotal; k++){   //destroys full row
+				field[i][k] = 0;
 			}
-			destroyedblocks += 10;
+			destroyedblocks += 10; //adds to score
+			blocksFall(i);         // moves blocks above destroyed row down
+			i=0;
 		}
 	}
 	return destroyedblocks;
 }
+
+
 
 int rng(int lower, int upper){
 	return (rand() % (upper-lower + 1)) + lower; // % (upper-lower + 1) + lower is apparently what you need to do to get random number in a range in C.
@@ -488,10 +512,10 @@ int main(int argc, char* argv[]){
 			lastFell = SDL_GetTicks();
 			if(hitground){
 				free(tetroptr);
+				score += checkForFullRow();
 				randomtype = rng(0,6); // 7 possible types
 				randomcol = rng(0,6);  // capped at 6 so a new tetromino does spawn out of bounds.
 				tetroptr = newTetro(0,randomcol,randomtype);
-				score += checkForFullRow();
 			}
 		}
         hidScanInput();
@@ -499,6 +523,7 @@ int main(int argc, char* argv[]){
         // hidKeysDown returns information about which buttons have been
         // just pressed in this frame compared to the previous one
         u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
+		u64 kHeld = hidKeysHeld(CONTROLLER_P1_AUTO);
 
         if (kDown & KEY_PLUS)
             break; // break in order to return to hbmenu
@@ -537,6 +562,14 @@ int main(int argc, char* argv[]){
 		sprintf(scoreStr,"%d",score);
 		drawText(renderer, Roboto_80, 0, 0, color, scoreStr);
 		SDL_RenderPresent(renderer);
+		if(500-score > 100){
+			fallms = 500-score;
+		} else{
+			fallms = 100;
+		}
+		if(kHeld == KEY_LSTICK_DOWN){
+			fallms = 100;
+		}
 		if(gameOver)
 			break;
     }
